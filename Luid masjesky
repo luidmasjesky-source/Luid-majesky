@@ -1,4 +1,6 @@
--- Simple Black ServerHop GUI | Draggable + Minimize + Save Config
+-- Simple Black ServerHop GUI | Draggable + Minimize + Save Config + Rejoin
+-- Tombol: Hop ke Server Ramai + Hop ke Small Server
+-- Auto Hop menggunakan mode "Server Ramai"
 -- Synapse X / Script-Ware / Krnl / Fluxus / Solara compatible
 
 local Players = game:GetService("Players")
@@ -8,12 +10,9 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local lp = Players.LocalPlayer
-local mouse = lp:GetMouse()
 
--- Config file name (akan tersimpan di folder workspace executor)
+-- Config
 local CONFIG_FILE = "SimpleHop_Config.json"
-
--- Load config jika ada
 local config = { autoHopEnabled = false }
 if isfile and isfile(CONFIG_FILE) then
     local success, loaded = pcall(function()
@@ -24,179 +23,244 @@ if isfile and isfile(CONFIG_FILE) then
     end
 end
 
--- Buat ScreenGui
+-- ScreenGui
 local sg = Instance.new("ScreenGui")
-sg.Name = "SimpleHop"
+sg.Name = "ServerHopGUI"
 sg.ResetOnSpawn = false
 sg.Parent = game:GetService("CoreGui")
 
--- Frame utama (hitam)
+-- Main Frame (ditinggikan biar muat 4 tombol)
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 180, 0, 140)
-main.Position = UDim2.new(0.5, -90, 0.5, -70)
-main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+main.Size = UDim2.new(0, 190, 0, 230)
+main.Position = UDim2.new(0.5, -95, 0.5, -115)
+main.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = sg
 
--- Title bar
+-- Title
 local title = Instance.new("Frame")
-title.Size = UDim2.new(1, 0, 0, 28)
-title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 title.BorderSizePixel = 0
 title.Parent = main
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -40, 1, 0)
-titleLabel.Position = UDim2.new(0, 8, 0, 0)
+titleLabel.Size = UDim2.new(1, -50, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Server Hop"
-titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+titleLabel.TextColor3 = Color3.fromRGB(210, 210, 210)
 titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextSize = 16
+titleLabel.TextSize = 17
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = title
 
--- Tombol Minimize
+-- Minimize
 local minBtn = Instance.new("TextButton")
-minBtn.Size = UDim2.new(0, 28, 0, 28)
-minBtn.Position = UDim2.new(1, -32, 0, 0)
-minBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -35, 0, 0)
+minBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
 minBtn.BorderSizePixel = 0
 minBtn.Text = "−"
-minBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+minBtn.TextColor3 = Color3.fromRGB(170, 170, 170)
 minBtn.Font = Enum.Font.SourceSansBold
-minBtn.TextSize = 18
+minBtn.TextSize = 20
 minBtn.Parent = title
 
--- Container tombol
+-- Content
 local content = Instance.new("Frame")
-content.Size = UDim2.new(1, 0, 1, -34)
-content.Position = UDim2.new(0, 0, 0, 34)
+content.Size = UDim2.new(1, 0, 1, -36)
+content.Position = UDim2.new(0, 0, 0, 36)
 content.BackgroundTransparency = 1
 content.Parent = main
 
--- Tombol Server Hop
-local btnHop = Instance.new("TextButton")
-btnHop.Size = UDim2.new(0.9, 0, 0, 36)
-btnHop.Position = UDim2.new(0.05, 0, 0.1, 0)
-btnHop.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-btnHop.BorderSizePixel = 0
-btnHop.Text = "Server Hop"
-btnHop.TextColor3 = Color3.fromRGB(220, 220, 220)
-btnHop.Font = Enum.Font.SourceSans
-btnHop.TextSize = 17
-btnHop.Parent = content
+-- Tombol Hop ke Server Ramai
+local btnRamai = Instance.new("TextButton")
+btnRamai.Size = UDim2.new(0.88, 0, 0, 38)
+btnRamai.Position = UDim2.new(0.06, 0, 0.04, 0)
+btnRamai.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+btnRamai.BorderSizePixel = 0
+btnRamai.Text = "Hop ke Server Ramai"
+btnRamai.TextColor3 = Color3.fromRGB(230, 230, 240)
+btnRamai.Font = Enum.Font.SourceSansSemibold
+btnRamai.TextSize = 16
+btnRamai.Parent = content
+
+-- Tombol Hop ke Small Server
+local btnSmall = Instance.new("TextButton")
+btnSmall.Size = UDim2.new(0.88, 0, 0, 38)
+btnSmall.Position = UDim2.new(0.06, 0, 0.26, 0)
+btnSmall.BackgroundColor3 = Color3.fromRGB(40, 70, 40)
+btnSmall.BorderSizePixel = 0
+btnSmall.Text = "Hop ke Small Server"
+btnSmall.TextColor3 = Color3.fromRGB(230, 230, 240)
+btnSmall.Font = Enum.Font.SourceSansSemibold
+btnSmall.TextSize = 16
+btnSmall.Parent = content
+
+-- Tombol Rejoin
+local btnRejoin = Instance.new("TextButton")
+btnRejoin.Size = UDim2.new(0.88, 0, 0, 38)
+btnRejoin.Position = UDim2.new(0.06, 0, 0.48, 0)
+btnRejoin.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+btnRejoin.BorderSizePixel = 0
+btnRejoin.Text = "Rejoin"
+btnRejoin.TextColor3 = Color3.fromRGB(220, 220, 220)
+btnRejoin.Font = Enum.Font.SourceSans
+btnRejoin.TextSize = 17
+btnRejoin.Parent = content
 
 -- Tombol Auto Hop
 local btnAuto = Instance.new("TextButton")
-btnAuto.Size = UDim2.new(0.9, 0, 0, 36)
-btnAuto.Position = UDim2.new(0.05, 0, 0.45, 0)
-btnAuto.BackgroundColor3 = config.autoHopEnabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(45, 45, 45)
+btnAuto.Size = UDim2.new(0.88, 0, 0, 38)
+btnAuto.Position = UDim2.new(0.06, 0, 0.70, 0)
+btnAuto.BackgroundColor3 = config.autoHopEnabled and Color3.fromRGB(70, 140, 70) or Color3.fromRGB(50, 50, 50)
 btnAuto.BorderSizePixel = 0
 btnAuto.Text = "Auto Hop (" .. (config.autoHopEnabled and "ON" or "OFF") .. ")"
-btnAuto.TextColor3 = Color3.fromRGB(220, 220, 220)
-btnAuto.Font = Enum.Font.SourceSans
+btnAuto.TextColor3 = Color3.fromRGB(230, 230, 230)
+btnAuto.Font = Enum.Font.SourceSansSemibold
 btnAuto.TextSize = 17
 btnAuto.Parent = content
 
--- Corners
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 6)
-corner.Parent = main
-local corner2 = corner:Clone(); corner2.Parent = title
-local corner3 = corner:Clone(); corner3.Parent = btnHop
-local corner4 = corner:Clone(); corner4.Parent = btnAuto
+-- Corner radius
+local function addCorner(parent)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 7)
+    c.Parent = parent
+end
+addCorner(main) addCorner(title) addCorner(btnRamai) addCorner(btnSmall) addCorner(btnRejoin) addCorner(btnAuto)
 
--- Fungsi Server Hop
-local function hop()
-    local success, servers = pcall(function()
+-- Setting Small Server (ubah angka ini sesuai kebutuhan)
+local SMALL_SERVER_MAX = 10   -- ≤ 10 player = small server
+
+-- Fungsi ambil list server
+local function fetchServers()
+    local success, res = pcall(function()
         return HttpService:JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
     end)
-    
-    if not success or not servers or not servers.data then
-        warn("Gagal mengambil daftar server")
+    if not success or not res or not res.data then
+        warn("Gagal fetch server list")
+        return nil
+    end
+    return res.data
+end
+
+-- Hop ke Server RAMAI (player terbanyak, tapi masih ada slot)
+local function hopToRamai()
+    local servers = fetchServers()
+    if not servers then return end
+
+    local candidates = {}
+    for _, s in ipairs(servers) do
+        if s.playing < s.maxPlayers and s.playing > 5 and s.id ~= game.JobId then  -- minimal 6 player biar benar-benar ramai
+            table.insert(candidates, s)
+        end
+    end
+
+    if #candidates == 0 then
+        warn("Tidak ada server ramai yang tersedia")
         return
     end
 
-    local good = {}
-    for _, v in ipairs(servers.data) do
-        if v.playing < v.maxPlayers and v.playing > 0 and v.id ~= game.JobId then
-            table.insert(good, v.id)
+    table.sort(candidates, function(a, b) return a.playing > b.playing end)  -- descending = paling ramai dulu
+    local target = candidates[1]
+    print("Hop ke RAMAI → " .. target.playing .. "/" .. target.maxPlayers)
+    pcall(TeleportService.TeleportToPlaceInstance, TeleportService, game.PlaceId, target.id, lp)
+end
+
+-- Hop ke Small Server (kecil, ≤ SMALL_SERVER_MAX)
+local function hopToSmall()
+    local servers = fetchServers()
+    if not servers then return end
+
+    local candidates = {}
+    for _, s in ipairs(servers) do
+        if s.playing > 0 and s.playing <= SMALL_SERVER_MAX and s.playing < s.maxPlayers and s.id ~= game.JobId then
+            table.insert(candidates, s)
         end
     end
 
-    if #good > 0 then
-        local chosen = good[math.random(1, #good)]
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, chosen, lp)
+    if #candidates == 0 then
+        warn("Tidak ada small server (≤" .. SMALL_SERVER_MAX .. " player)")
+        return
+    end
+
+    table.sort(candidates, function(a, b) return a.playing < b.playing end)
+    local target = candidates[1]
+    print("Hop ke SMALL → " .. target.playing .. "/" .. target.maxPlayers)
+    pcall(TeleportService.TeleportToPlaceInstance, TeleportService, game.PlaceId, target.id, lp)
+end
+
+-- Rejoin
+local function rejoin()
+    if game.JobId and game.JobId ~= "" then
+        pcall(TeleportService.TeleportToPlaceInstance, TeleportService, game.PlaceId, game.JobId, lp)
     else
-        warn("Tidak menemukan server yang cocok")
+        warn("Tidak bisa rejoin - JobId kosong")
     end
 end
 
--- Auto hop logic
+-- Auto Hop Logic (pakai mode RAMAI)
 local autoRunning = false
-local autoConn
+local autoConnection
 
-local function updateAutoHop(state)
-    autoRunning = state
-    btnAuto.Text = "Auto Hop (" .. (state and "ON" or "OFF") .. ")"
-    btnAuto.BackgroundColor3 = state and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(45, 45, 45)
-    
-    -- Simpan config
+local function setAutoHop(enabled)
+    autoRunning = enabled
+    btnAuto.Text = "Auto Hop (" .. (enabled and "ON" or "OFF") .. ")"
+    btnAuto.BackgroundColor3 = enabled and Color3.fromRGB(70, 140, 70) or Color3.fromRGB(50, 50, 50)
+
     if writefile then
         pcall(function()
-            writefile(CONFIG_FILE, HttpService:JSONEncode({ autoHopEnabled = state }))
+            writefile(CONFIG_FILE, HttpService:JSONEncode({ autoHopEnabled = enabled }))
         end)
     end
 
-    if state then
-        if autoConn then autoConn:Disconnect() end
-        autoConn = RunService.Heartbeat:Connect(function()
+    if enabled then
+        if autoConnection then autoConnection:Disconnect() end
+        autoConnection = RunService.Heartbeat:Connect(function()
             if not autoRunning then return end
-            hop()
-            task.wait(5.2)  -- sedikit lebih aman dari rate limit
+            hopToRamai()   -- AUTO menggunakan filter SERVER RAMAI
+            task.wait(7 + math.random(2, 6))  -- delay 7-13 detik (lebih aman)
         end)
     else
-        if autoConn then
-            autoConn:Disconnect()
-            autoConn = nil
+        if autoConnection then
+            autoConnection:Disconnect()
+            autoConnection = nil
         end
     end
 end
 
--- Tombol klik
-btnHop.MouseButton1Click:Connect(hop)
-
+-- Events
+btnRamai.MouseButton1Click:Connect(hopToRamai)
+btnSmall.MouseButton1Click:Connect(hopToSmall)
+btnRejoin.MouseButton1Click:Connect(rejoin)
 btnAuto.MouseButton1Click:Connect(function()
-    updateAutoHop(not autoRunning)
+    setAutoHop(not autoRunning)
 end)
 
 -- Minimize logic
-local minimized = false
+local isMinimized = false
 minBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    
-    if minimized then
-        main.Size = UDim2.new(0, 180, 0, 28)
+    isMinimized = not isMinimized
+    if isMinimized then
+        main.Size = UDim2.new(0, 190, 0, 30)
         content.Visible = false
         minBtn.Text = "+"
     else
-        main.Size = UDim2.new(0, 180, 0, 140)
+        main.Size = UDim2.new(0, 190, 0, 230)
         content.Visible = true
         minBtn.Text = "−"
     end
 end)
 
 -- Draggable
-local dragging, dragStart, startPos
-
+local dragging, dragInput, dragStart, startPos
 title.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = main.Position
-        
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -208,21 +272,16 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        main.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
--- Inisialisasi auto hop dari config
+-- Load auto dari config
 if config.autoHopEnabled then
     task.spawn(function()
-        task.wait(1.5)  -- tunggu sebentar biar teleport tidak langsung jalan pas masuk
-        updateAutoHop(true)
+        task.wait(2.8)
+        setAutoHop(true)
     end)
 end
 
-print("Simple Draggable ServerHop GUI + Save Config loaded!")
+print("ServerHop loaded → Ramai / Small / Auto (mode Ramai)")
